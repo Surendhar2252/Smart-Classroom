@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body oo>
+    <div class="sidebar">
+        <h2>Student Profile</h2>
+        {% if student %}
+            <img src="{{ url_for('static', filename='images/' + student['image']) }}" alt="Student Image">
+            <h3>{{ student['name'] }}</h3>
+            <p><strong>Roll Number:</strong> {{ student['roll_number'] }}</p>
+            <p><strong>Department:</strong> {{ student['department'] }}</p>
+        {% else %}
+            <p>No student data available.</p>
+        {% endif %}
+    </div>
+
+    <div class="main-content">
+        <h2>Semester-wise Performance</h2>
+        
+        {% if semesters %}
+            <table class="performance-table">
+                <thead>
+                    <tr>
+                        <th>Semester</th>
+                        <th>SGPA</th>
+                        <th>CGPA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sem in semesters %}
+                    <tr>
+                        <td>{{ sem['semester'] }}</td>
+                        <td>{{ sem['sgpa'] }}</td>
+                        <td>{{ sem['cgpa'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No performance data available.</p>
+        {% endif %}
+
+        {% if graph_path %}
+            <div class="graph-container">
+                <img src="{{ url_for('static', filename='images/performance_graph.png') }}" alt="Performance Graph">
+            </div>
+        {% endif %}
+
+        <div class="upload-form">
+            <h3>Upload Student Details</h3>
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <label>Name:</label>
+                <input type="text" name="name" required>
+
+                <label>Roll Number:</label>
+                <input type="text" name="roll_number" required>
+
+                <label>Department:</label>
+                <input type="text" name="department" required>
+
+                <label>Upload Image:</label>
+                <input type="file" name="image" accept="image/*" required>
+
+                <h3>Enter SGPA & CGPA for All Semesters</h3>
+                <table class="input-table">
+                    <thead>
+                        <tr>
+                            <th>Semester</th>
+                            <th>SGPA</th>
+                            <th>CGPA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sem in range(1, 4) %}
+                        <tr>
+                            <td>{{ sem }}</td>
+                            <td><input type="number" step="0.01" name="sgpa_sem{{ sem }}" required></td>
+                            <td><input type="number" step="0.01" name="cgpa_sem{{ sem }}" required></td>
+                        </tr>
+                        {% endfor %}
+                        {% for sem in range(5, 9) %}
+                        <tr>
+                            <td>{{ sem }}</td>
+                            <td><input type="number" step="0.01" name="sgpa_sem{{ sem }}"></td>
+                            <td><input type="number" step="0.01" name="cgpa_sem{{ sem }}"></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="static/js/script.js"></script>
+</body>
+</html>
