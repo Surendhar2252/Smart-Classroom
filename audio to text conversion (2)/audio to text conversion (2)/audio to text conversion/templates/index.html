@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Audio Transcription & Summarization</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        let speech = new SpeechSynthesisUtterance();
+        let isPlaying = false;
+
+        function summarizeText() {
+            var text = document.getElementById("transcribed-text").innerText;
+            if (!text.trim()) {
+                alert("No text to summarize!");
+                return;
+            }
+
+            fetch("/summarize", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("summary-box").innerText = data.summary;
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        }
+
+        function readAloud() {
+            var summaryText = document.getElementById("summary-box").innerText;
+            if (!summaryText.trim()) {
+                alert("No summary available to read!");
+                return;
+            }
+
+            if (!isPlaying) {
+                speech.text = summaryText;
+                speech.lang = "en-US";
+                speech.rate = 1;
+                speech.volume = 1;
+                speechSynthesis.speak(speech);
+                isPlaying = true;
+            }
+        }
+
+        function pauseReading() {
+            if (isPlaying && speechSynthesis.speaking) {
+                speechSynthesis.pause();
+                isPlaying = false;
+            }
+        }
+
+        function resumeReading() {
+            if (!isPlaying && speechSynthesis.paused) {
+                speechSynthesis.resume();
+                isPlaying = true;
+            }
+        }
+
+        function stopReading() {
+            speechSynthesis.cancel();
+            isPlaying = false;
+        }
+    </script>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 bg-cover bg-center" style="background-image: url('/static/images/img.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat;"></body>
+
+    <div class="max-w-xl w-full bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 class="text-center text-2xl font-bold text-blue-400">🎙 AI Audio Transcription & Summarization</h2>
+
+        <form action="/" method="post" enctype="multipart/form-data" class="mt-4 text-center">
+            <input type="file" name="file" accept=".mp3,.wav" class="w-full p-3 border border-gray-600 rounded bg-gray-700 text-white" required>
+            <button type="submit" class="w-full mt-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg">Upload & Transcribe</button>
+        </form>
+
+        <div class="mt-6" >
+            <h4 class="text-lg font-semibold text-white">Transcribed Text:</h4>
+            <div class="mt-2 p-3 bg-gray-700 rounded-md min-h-[100px]" id="transcribed-text">
+                <p class="text-white">{{ text }}</p>
+            </div>
+        </div>
+
+        <div class="mt-4 text-center">
+            <button onclick="summarizeText()" class="w-full py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg">Summarize</button>
+        </div>
+
+        <div class="mt-6" >
+            <h4 class="text-lg font-semibold text-white">Summarized Text:</h4>
+            <div class="mt-2 p-3 bg-gray-700 rounded-md min-h-[100px] text-white" id="summary-box">
+                <p class="text-white">{{ summary }}</p>
+            </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap gap-2 justify-center">
+            <button onclick="readAloud()" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg">▶ Play</button>
+            <button onclick="pauseReading()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg">⏸ Pause</button>
+            <button onclick="resumeReading()" class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg">⏯ Resume</button>
+            <button onclick="stopReading()" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg">⏹ Stop</button>
+        </div>
+    </div>
+
+</body>
+</html>
